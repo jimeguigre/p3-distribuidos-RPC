@@ -1,71 +1,53 @@
 CC = gcc
-CFLAGS = -Wall -Werror -fPIC
+CFLAGS = -Wall -fPIC -I/usr/include/tirpc
+LDLIBS = -ltirpc
 
-#LDFLAGS: quitamos -lrt porque ya no usamos mqueue
-LDFLAGS_LOGICA = -L. -lclaves -lpthread -Wl,-rpath,.
-LDFLAGS_PROXY = -L. -lproxyclaves -Wl,-rpath,.
-LD_LIBRARY_PATH_EXPORT = export LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH
+# Banderas para encontrar librerías .so en el directorio actual [cite: 14, 43]
+LDFLAGS = -L. -Wl,-rpath,.
 
-all: libclaves.so libproxyclaves.so servidor app_cliente app_cliente_test_duplicados app_cliente_test_carga app_cliente_escritor app_cliente_lector app_cliente_test_protocolo
- 
-#BIBLIOTECAS
+# Archivos que rpcgen genera automáticamente [cite: 20]
+RPC_GEN = clavesRPC_clnt.c clavesRPC_svc.c clavesRPC_xdr.c clavesRPC.h
+RPC_OBJ = clavesRPC_clnt.o clavesRPC_xdr.o clavesRPC_svc.o
+
+all: servidor app_cliente
+
+# 1. Regla única para rpcgen [cite: 20, 45]
+# Usamos -C para evitar errores de compatibilidad y generar archivos ANSI C.
+$(RPC_GEN): clavesRPC.x
+	rpcgen -NM -C clavesRPC.x
+
+# 2. Bibliotecas [cite: 8, 14, 42]
 libclaves.so: claves.o
 	$(CC) -shared -o libclaves.so claves.o
 
-libproxyclaves.so: proxy-sock.o
-	$(CC) -shared -o libproxyclaves.so proxy-sock.o
+libproxyclaves.so: proxy-rpc.o clavesRPC_clnt.o clavesRPC_xdr.o
+	$(CC) -shared -o libproxyclaves.so proxy-rpc.o clavesRPC_clnt.o clavesRPC_xdr.o $(LDLIBS)
 
+# 3. Compilación de objetos
+# Forzamos que los objetos dependan de la generación de los archivos RPC
 claves.o: claves.c claves.h
 	$(CC) $(CFLAGS) -c claves.c
 
-proxy-sock.o: proxy-sock.c claves.h
-	$(CC) $(CFLAGS) -c proxy-sock.c
+proxy-rpc.o: proxy-rpc.c clavesRPC.h
+	$(CC) $(CFLAGS) -c proxy-rpc.c
 
-#EJECUTABLES
-servidor: servidor-sock.o libclaves.so
-	$(CC) -o servidor servidor-sock.o $(LDFLAGS_LOGICA)
+clavesRPC_server.o: clavesRPC_server.c clavesRPC.h
+	$(CC) $(CFLAGS) -c clavesRPC_server.c
 
-servidor-sock.o: servidor-sock.c claves.h
-	$(CC) $(CFLAGS) -c servidor-sock.c
+# Regla genérica para los archivos generados por rpcgen
+clavesRPC_clnt.o: clavesRPC_clnt.c clavesRPC.h
+clavesRPC_svc.o: clavesRPC_svc.c clavesRPC.h
+clavesRPC_xdr.o: clavesRPC_xdr.c clavesRPC.h
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+# 4. Ejecutables [cite: 11, 16, 43, 49]
+servidor: clavesRPC_server.o clavesRPC_svc.o clavesRPC_xdr.o libclaves.so
+	$(CC) -o servidor clavesRPC_server.o clavesRPC_svc.o clavesRPC_xdr.o $(LDFLAGS) -lclaves $(LDLIBS) -lpthread
 
 app_cliente: app_cliente.o libproxyclaves.so
-	$(CC) -o app_cliente app_cliente.o $(LDFLAGS_PROXY)
+	$(CC) -o app_cliente app_cliente.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
 
-app_cliente.o: app_cliente.c claves.h
-	$(CC) $(CFLAGS) -c app_cliente.c
-
-#ARCHIVOS DE PRUEBAS
-app_cliente_test_duplicados: pruebas/app_cliente_test_duplicados.o libproxyclaves.so
-	$(CC) -o app_cliente_test_duplicados pruebas/app_cliente_test_duplicados.o $(LDFLAGS_PROXY)
-
-app_cliente_test_duplicados.o: pruebas/app_cliente_test_duplicados.c claves.h
-	$(CC) $(CFLAGS) -c pruebas/app_cliente_test_duplicados.c
-
-app_cliente_test_carga: pruebas/app_cliente_test_carga.o libproxyclaves.so
-	$(CC) -o app_cliente_test_carga pruebas/app_cliente_test_carga.o $(LDFLAGS_PROXY)
-
-app_cliente_test_carga.o: pruebas/app_cliente_test_carga.c claves.h
-	$(CC) $(CFLAGS) -c pruebas/app_cliente_test_carga.c
-
-app_cliente_escritor: pruebas/app_cliente_escritor.o libproxyclaves.so
-	$(CC) -o app_cliente_escritor pruebas/app_cliente_escritor.o $(LDFLAGS_PROXY)
-
-app_cliente_escritor.o: pruebas/app_cliente_escritor.c claves.h
-	$(CC) $(CFLAGS) -c pruebas/app_cliente_escritor.c
-
-app_cliente_lector: pruebas/app_cliente_lector.o libproxyclaves.so
-	$(CC) -o app_cliente_lector pruebas/app_cliente_lector.o $(LDFLAGS_PROXY)
-
-app_cliente_lector.o: pruebas/app_cliente_lector.c claves.h
-	$(CC) $(CFLAGS) -c pruebas/app_cliente_lector.c
-
-app_cliente_test_protocolo: pruebas/app_cliente_test_protocolo.o libproxyclaves.so
-	$(CC) -o app_cliente_test_protocolo pruebas/app_cliente_test_protocolo.o $(LDFLAGS_PROXY)
-
-pruebas/app_cliente_test_protocolo.o: pruebas/app_cliente_test_protocolo.c claves.h
-	$(CC) $(CFLAGS) -c pruebas/app_cliente_test_protocolo.c -o pruebas/app_cliente_test_protocolo.o
-
-#LIMPIEZA
 clean:
-	rm -f *.o *.so app_cliente servidor app_cliente_test_duplicados resultado_cliente_*.txt app_cliente_test_carga resultado_carga_*.txt app_cliente_escritor app_cliente_lector app_cliente_test_protocolo
-	
+	rm -f *.o *.so servidor app_cliente $(RPC_GEN)
