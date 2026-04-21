@@ -23,8 +23,11 @@ int main() {
     printf("--- INICIANDO PLAN DE PRUEBAS ---\n");
 
     // 1. Probar set_value con la clave única
-    if (set_value(clave_unica, v1, n2, v2, v3) == 0) {
+    int res = set_value(clave_unica, v1, n2, v2, v3);
+    if (res == 0) {
         printf("Cliente %d: Inserción de '%s' correcta.\n", getpid(), clave_unica);
+    } else {
+        printf("Cliente %d: ERROR en set_value (Resultado: %d). ¿Está el servidor encendido?\n", getpid(), res);
     }
 
     // 2. Probar exist (USANDO CLAVE_UNICA)
