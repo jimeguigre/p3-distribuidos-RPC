@@ -8,7 +8,7 @@
 #define MAX_VEC 32
 
 void print_test_result(const char *test_name, int passed) {
-    printf("[TEST %s]: %s\n", test_name, passed ? "PASADO ✅" : "FALLADO ❌");
+    printf("[TEST %s]: %s\n", test_name, passed ? "PASADO" : "FALLADO");
 }
 
 int main() {

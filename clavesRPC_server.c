@@ -30,6 +30,20 @@ set_value_1_svc(struct set_value_args args, int *result, struct svc_req *rqstp)
     p.y = args.value3.y;
     p.z = args.value3.z;
 
+	// LOG DETALLADO PARA PRUEBA DE INTEGRIDAD
+    printf("\n--- SERVIDOR: DATOS RECIBIDOS POR RPC ---\n");
+    printf("Clave recibida: %s\n", args.key);
+    printf("Value1 recibido: %s\n", args.value1);
+    printf("N_Value2: %d\n", args.n_value2);
+    
+    for(int i = 0; i < args.n_value2; i++) {
+        printf("V_Value2[%d]: %.2f\n", i, args.v_value2[i]);
+    }
+    
+    printf("Paquete V3: x=%d, y=%d, z=%d\n", 
+            args.value3.x, args.value3.y, args.value3.z);
+    printf("------------------------------------------\n");
+
     // Llamamos a la lógica original
     *result = set_value(args.key, args.value1, args.n_value2, args.v_value2, p);
     return TRUE;

@@ -56,5 +56,25 @@ app_cliente_test_xdr.o: pruebas/app_cliente_test_xdr.c claves.h
 test_xdr: app_cliente_test_xdr.o libproxyclaves.so
 	$(CC) -o test_xdr app_cliente_test_xdr.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
 
+test_memoria: app_cliente_test_memoria.o libproxyclaves.so
+	$(CC) -o test_memoria app_cliente_test_memoria.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
+
+app_cliente_test_memoria.o: pruebas/test_memoria.c claves.h
+	$(CC) $(CFLAGS) -c pruebas/test_memoria.c -o app_cliente_test_memoria.o
+
+# Regla para el cliente de duplicados
+app_cliente_test_duplicados.o: pruebas/app_cliente_test_duplicados.c claves.h
+	$(CC) $(CFLAGS) -c pruebas/app_cliente_test_duplicados.c -o app_cliente_test_duplicados.o
+
+# Regla para el ejecutable final
+test_duplicados: app_cliente_test_duplicados.o libproxyclaves.so
+	$(CC) -o test_duplicados app_cliente_test_duplicados.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
+
+test_integridad: app_cliente_test_integridad.o libproxyclaves.so
+	$(CC) -o test_integridad app_cliente_test_integridad.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
+
+app_cliente_test_integridad.o: pruebas/test_integridad.c claves.h
+	$(CC) $(CFLAGS) -c pruebas/test_integridad.c -o app_cliente_test_integridad.o
+
 clean:
-	rm -f *.o *.so servidor app_cliente $(RPC_GEN) test_xdr
+	rm -f *.o *.so servidor app_cliente $(RPC_GEN) test_xdr test_memoria test_duplicados test_integridad
