@@ -45,7 +45,9 @@ get_value_1_svc(char *key, struct get_value_res *result, struct svc_req *rqstp)
     memset(result, 0, sizeof(struct get_value_res));
 
     // Llamamos a la lógica original. Los datos se guardan directamente en la estructura de respuesta RPC.
-    result->resultado = get_value(key, result->value1, &result->n_value2, result->v_value2, &p);
+    //result->resultado = get_value(key, result->value1, &result->n_value2, result->v_value2, &p);
+	result->value1 = (char *) malloc(256); // Reservamos memoria para la cadena value1
+	result->resultado = get_value(key, result->value1, &result->n_value2, result->v_value2, &p);
 
     if (result->resultado == 0) {
         result->value3.x = p.x;

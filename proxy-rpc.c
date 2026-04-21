@@ -45,8 +45,13 @@ int set_value(char *key, char *value1, int n_value2, float *v_value2, struct Paq
     enum clnt_stat status = set_value_1(args, &res, clnt);
 
     if (status != RPC_SUCCESS) {
+        clnt_perror(clnt, "Fallo en la llamada RPC");
         clnt_destroy(clnt);
         return -1;
+    }
+
+    if (res == -1) {
+    printf("El servidor rechazó la inserción (posible clave duplicada o N_value2 fuera de rango)\n");
     }
 
     clnt_destroy(clnt);
@@ -58,6 +63,10 @@ int get_value(char *key, char *value1, int *n_value2, float *v_value2, struct Pa
     if (clnt == NULL) return -1;
 
     struct get_value_res res_rpc;
+
+    // IMPORTANTE: Inicializar a cero para que los punteros internos de res_rpc sean NULL
+    memset(&res_rpc, 0, sizeof(res_rpc));
+
     // Se pasa 'key' y '&res_rpc'
     enum clnt_stat status = get_value_1(key, &res_rpc, clnt);
 
@@ -67,9 +76,18 @@ int get_value(char *key, char *value1, int *n_value2, float *v_value2, struct Pa
     }
 
     if (res_rpc.resultado == 0) {
-        strcpy(value1, res_rpc.value1);
+        // 1. Copiar el string (XDR reserva memoria en res_rpc.value1 automáticamente)
+        if (res_rpc.value1 != NULL) {
+            strncpy(value1, res_rpc.value1, 255);
+            value1[255] = '\0';
+        }
+
+        // 2. Copiar los valores numéricos
         *n_value2 = res_rpc.n_value2;
-        for (int i = 0; i < res_rpc.n_value2; i++) v_value2[i] = res_rpc.v_value2[i];
+        for (int i = 0; i < res_rpc.n_value2; i++) {
+            v_value2[i] = res_rpc.v_value2[i];
+        }
+
         value3->x = res_rpc.value3.x;
         value3->y = res_rpc.value3.y;
         value3->z = res_rpc.value3.z;

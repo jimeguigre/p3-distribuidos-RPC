@@ -49,5 +49,12 @@ servidor: clavesRPC_server.o clavesRPC_svc.o clavesRPC_xdr.o libclaves.so
 app_cliente: app_cliente.o libproxyclaves.so
 	$(CC) -o app_cliente app_cliente.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
 
+# pruebas
+app_cliente_test_xdr.o: pruebas/app_cliente_test_xdr.c claves.h
+	$(CC) $(CFLAGS) -c pruebas/app_cliente_test_xdr.c
+
+test_xdr: app_cliente_test_xdr.o libproxyclaves.so
+	$(CC) -o test_xdr app_cliente_test_xdr.o $(LDFLAGS) -lproxyclaves $(LDLIBS)
+
 clean:
-	rm -f *.o *.so servidor app_cliente $(RPC_GEN)
+	rm -f *.o *.so servidor app_cliente $(RPC_GEN) test_xdr
