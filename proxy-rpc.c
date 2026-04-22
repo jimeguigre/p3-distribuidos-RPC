@@ -70,6 +70,16 @@ int set_value(char *key, char *value1, int n_value2, float *V_value2, struct Paq
 }
 
 int get_value(char *key, char *value1, int *N_value2, float *V_value2, struct Paquete *value3) {
+    // Antes de hacer la llamada RPC, inicializamos los valores de salida a cero o NULL para evitar basura en caso de error.
+    if (value1 != NULL) memset(value1, 0, 256);
+    if (V_value2 != NULL) memset(V_value2, 0, 32 * sizeof(float));
+    if (N_value2 != NULL) *N_value2 = 0;
+    if (value3 != NULL) {
+        value3->x = 0;
+        value3->y = 0;
+        value3->z = 0;
+    }
+    
     CLIENT *clnt = conectar_rpc();
     if (clnt == NULL) return -1;
 
@@ -88,10 +98,8 @@ int get_value(char *key, char *value1, int *N_value2, float *V_value2, struct Pa
 
     if (res_rpc.resultado == 0) {
         // copia del string (XDR reserva memoria en res_rpc.value1 automáticamente)
-        /*if (res_rpc.value1 != NULL) {
-            strncpy(value1, res_rpc.value1, 255);
-            value1[255] = '\0';
-        }*/
+        strncpy(value1, res_rpc.value1, 255);
+        value1[255] = '\0';
 
         // copia de los valores numéricos
         *N_value2 = res_rpc.N_value2;
