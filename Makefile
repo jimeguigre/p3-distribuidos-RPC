@@ -14,7 +14,7 @@ all: servidor app_cliente
 # 1. Regla única para rpcgen [cite: 20, 45]
 # Usamos -C para evitar errores de compatibilidad y generar archivos ANSI C.
 $(RPC_GEN): clavesRPC.x
-	rpcgen -NM -C clavesRPC.x
+	rpcgen -NM clavesRPC.x
 
 # 2. Bibliotecas [cite: 8, 14, 42]
 libclaves.so: claves.o
