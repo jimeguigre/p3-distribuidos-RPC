@@ -33,7 +33,7 @@ int main() {
     memset(v1_limite, 'A', 255); // Llenamos 255 posiciones con 'A'
     v1_limite[255] = '\0';        // El carácter 256 es el terminador
 
-    // --- EJECUCIÓN ---
+    // EJECUCIÓN DE PRUEBAS: 
 
     // Prueba de inserción de cadena límite
     if (set_value(key_limite, v1_limite, 1, v2_original, v3_original) != 0) {
@@ -47,7 +47,7 @@ int main() {
         exit(1);
     }
 
-    // --- VERIFICACIÓN ---
+    // VERIFICACIÓN:
     char res_v1[MAX_STR];
     int res_n2;
     float res_v2[MAX_VEC];
