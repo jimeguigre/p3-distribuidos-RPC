@@ -36,16 +36,17 @@ int destroy() {
     return res;
 }
 
-int set_value(char *key, char *value1, int n_value2, float *v_value2, struct Paquete value3) {
+int set_value(char *key, char *value1, int n_value2, float *V_value2, struct Paquete value3) {
     CLIENT *clnt = conectar_rpc();
     if (clnt == NULL) return -1;
 
     // encapsulamos los argumentos en la estructura generada por rpcgen para set_value
     struct set_value_args args;
     args.key = key;
-    args.value1 = value1;
-    args.n_value2 = n_value2;
-    for (int i = 0; i < n_value2; i++) args.v_value2[i] = v_value2[i];
+    strncpy(args.value1, value1, 255);
+    args.value1[255] = '\0'; // Aseguramos el cierre de la cadena
+    args.N_value2 = n_value2;
+    for (int i = 0; i < n_value2; i++) args.V_value2[i] = V_value2[i];
     args.value3.x = value3.x;
     args.value3.y = value3.y;
     args.value3.z = value3.z;
@@ -68,7 +69,7 @@ int set_value(char *key, char *value1, int n_value2, float *v_value2, struct Paq
     return res;
 }
 
-int get_value(char *key, char *value1, int *n_value2, float *v_value2, struct Paquete *value3) {
+int get_value(char *key, char *value1, int *N_value2, float *V_value2, struct Paquete *value3) {
     CLIENT *clnt = conectar_rpc();
     if (clnt == NULL) return -1;
 
@@ -87,15 +88,15 @@ int get_value(char *key, char *value1, int *n_value2, float *v_value2, struct Pa
 
     if (res_rpc.resultado == 0) {
         // copia del string (XDR reserva memoria en res_rpc.value1 automáticamente)
-        if (res_rpc.value1 != NULL) {
+        /*if (res_rpc.value1 != NULL) {
             strncpy(value1, res_rpc.value1, 255);
             value1[255] = '\0';
-        }
+        }*/
 
         // copia de los valores numéricos
-        *n_value2 = res_rpc.n_value2;
-        for (int i = 0; i < res_rpc.n_value2; i++) {
-            v_value2[i] = res_rpc.v_value2[i];
+        *N_value2 = res_rpc.N_value2;
+        for (int i = 0; i < res_rpc.N_value2; i++) {
+            V_value2[i] = res_rpc.V_value2[i];
         }
 
         value3->x = res_rpc.value3.x;
@@ -111,16 +112,17 @@ int get_value(char *key, char *value1, int *n_value2, float *v_value2, struct Pa
 }
 
 // La función modify_value sigue una lógica similar a set_value, pero con la estructura de argumentos específica para esta operación.
-int modify_value(char *key, char *value1, int n_value2, float *v_value2, struct Paquete value3) {
+int modify_value(char *key, char *value1, int N_value2, float *V_value2, struct Paquete value3) {
     CLIENT *clnt = conectar_rpc();
     if (clnt == NULL) return -1;
 
     // encapsulamos los argumentos en la estructura generada por rpcgen para modify_value
     struct set_value_args args;
     args.key = key;
-    args.value1 = value1;
-    args.n_value2 = n_value2;
-    for (int i = 0; i < n_value2; i++) args.v_value2[i] = v_value2[i];
+    strncpy(args.value1, value1, 255);
+    args.value1[255] = '\0'; // Aseguramos el cierre de la cadena
+    args.N_value2 = N_value2;
+    for (int i = 0; i < N_value2; i++) args.V_value2[i] = V_value2[i];
     args.value3.x = value3.x;
     args.value3.y = value3.y;
     args.value3.z = value3.z;

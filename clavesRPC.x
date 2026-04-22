@@ -6,7 +6,7 @@ struct paquete_rpc {
 
 struct set_value_args {
     string key<256>;
-    string value1<256>;
+    char value1[256];
     int N_value2;
     float V_value2[32];
     struct paquete_rpc value3;
@@ -14,7 +14,7 @@ struct set_value_args {
 
 struct get_value_res {
     int resultado;
-    string value1<256>;
+    char value1[256];
     int N_value2;
     float V_value2[32];
     struct paquete_rpc value3;
