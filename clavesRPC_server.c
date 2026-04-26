@@ -6,9 +6,9 @@
 
 /* * Implementación de los procedimientos del servidor.
  Al usar rpcgen -N -M:
- 1. Los argumentos se pasan por valor (no punteros a estructuras).
- 2. El resultado se devuelve por referencia en el segundo parámetro.
- 3. La función devuelve un bool_t para indicar el éxito de la llamada RPC.
+ - Los argumentos se pasan por valor (no punteros a estructuras).
+ - El resultado se devuelve por referencia en el segundo parámetro.
+ - La función devuelve un bool_t para indicar el éxito de la llamada RPC.
  */
 
 // Cada función sigue la firma generada por rpcgen, adaptando los parámetros a la lógica original de claves.c.
